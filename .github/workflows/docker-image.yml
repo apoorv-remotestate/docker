@@ -7,7 +7,7 @@ on:
     branches: [main, dev]
 
 jobs:
-  build:
+  build and publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,11 +16,22 @@ jobs:
       - name: Branch
         run: echo "${{github.ref}}"
 
+      - name: Set Environment variables
+        run: if [["${{github.ref}}"=='refs/heads/main']]; then
+          name='apoorv'
+          fi
+          if [["${{github.ref}}"=='refs/heads/dev']]; then
+          name='sharma'
+          fi
+
       - name: Docker Login
         run: docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}}
 
       - name: Build the Docker image
-        run: docker build -t apoorvkumarsharma/docker_v1 .
+        run: docker build \
+          --tag apoorvkumarsharma/docker_v1 \
+          --build-arg NEXT_PUBLIC_TEST_VAR=name \
+          .
 
       - name: Publish the docker image
         run: docker push apoorvkumarsharma/docker_v1
