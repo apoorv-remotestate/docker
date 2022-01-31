@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag docker_v1:$(date +%s)
+        run: docker build . --file Dockerfile --tag apoorvkumarsharma/docker_v1:$(date +%s)
 
   publish:
     runs-on: ubuntu-latest
