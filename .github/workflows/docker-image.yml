@@ -19,11 +19,10 @@ jobs:
       - name: Set Environment variables
         run: |-
           if [["${{github.ref}}"=='refs/heads/main']]; then
-          env: name:"apoorv"
-          echo "${name}"
+          echo "name=apoorv">>"$GITHUB_ENV"
           fi
           if [["${{github.ref}}"=='refs/heads/dev']]; then
-          env: name:"sharma"
+          echo "name=sharma">>"$GITHUB_ENV"
           fi
 
       - name: Docker Login
@@ -33,7 +32,7 @@ jobs:
         run: |-
           docker build \
             --tag apoorvkumarsharma/docker_v1 \
-            --build-arg NEXT_PUBLIC_TEST_VAR=$name \
+            --build-arg NEXT_PUBLIC_TEST_VAR="$name" \
             .
 
       - name: Publish the docker image
