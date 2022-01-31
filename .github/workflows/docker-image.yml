@@ -17,7 +17,8 @@ jobs:
         run: echo "${{github.ref}}"
 
       - name: Set Environment variables
-        run: if [["${{github.ref}}"=='refs/heads/main']]; then
+        run: |-
+          if [["${{github.ref}}"=='refs/heads/main']]; then
           name='apoorv'
           fi
           if [["${{github.ref}}"=='refs/heads/dev']]; then
