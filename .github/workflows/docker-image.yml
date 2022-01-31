@@ -18,10 +18,10 @@ jobs:
 
       - name: Set Environment variables
         run: |-
-          if [["${{github.ref}}"=='refs/heads/main']]; then
+          if [["${{github.ref}}" == "refs/heads/main"]]; then
           echo "name=apoorv">>"$GITHUB_ENV"
           fi
-          if [["${{github.ref}}"=='refs/heads/dev']]; then
+          if [["${{github.ref}}" == "refs/heads/dev"]]; then
           echo "name=sharma">>"$GITHUB_ENV"
           fi
 
