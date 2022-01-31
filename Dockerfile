@@ -1,6 +1,7 @@
 FROM node:lts-alpine
 WORKDIR /docker
-ENV NEXT_PUBLIC_TEST "hey"
+ARG NEXT_PUBLIC_TEST_VAR
+ENV NEXT_PUBLIC_TEST ${NEXT_PUBLIC_TEST_VAR}
 COPY . .
 RUN npm install --only=production
 RUN npm run build
