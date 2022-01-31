@@ -15,6 +15,7 @@ jobs:
 
       - name: Branch
         run: echo "${{github.ref}}"
+        env: name: "kumar"
 
       - name: Set Environment variables
         run: |-
