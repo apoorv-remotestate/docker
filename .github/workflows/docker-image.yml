@@ -19,5 +19,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      -name: Publish the docker image
-      run: docker push apoorvkumarsharma/docker_v1:$(date +%s)
+      - uses: actions/checkout@v2
+      - name: Publish the docker image
+        run: docker push apoorvkumarsharma/docker_v1:$(date +%s)
