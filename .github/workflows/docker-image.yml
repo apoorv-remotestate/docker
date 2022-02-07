@@ -16,6 +16,17 @@ jobs:
       - name: Branch
         run: echo "${{github.ref}}"
 
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Set Environment variables
         run: |-
           if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
@@ -37,3 +48,21 @@ jobs:
 
       - name: Publish the docker image
         run: docker push apoorvkumarsharma/docker_v1
+
+      - name: download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition $ECS_TASK --query taskDefinition > task-definition.json
+      - name: fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          # image: ${{ steps.build-image.outputs.image }}
+      - name: deploy Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
