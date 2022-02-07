@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, dev]
 
+env:
+  AWS_REGION: ap-south-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
@@ -13,8 +18,31 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set branch name
+        run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Set branch environments
+        run: |-
+          echo "ECS_SERVICE=deploy-service" >> "$GITHUB_ENV"
+          echo "ECS_CLUSTER=deploy-cluster" >> "$GITHUB_ENV"
+          echo "ECS_TASK=deploy-task" >> "$GITHUB_ENV"
+          echo "CONTAINER_NAME=deploy-container" >> "$GITHUB_ENV"
+          echo "AWS_KEY=$AWS_ACCESS_KEY_ID" >> "$GITHUB_ENV"
+          echo "AWS_SECRET=$AWS_ACCESS_KEY" >> "$GITHUB_ENV"
+
       - name: Branch
         run: echo "${{github.ref}}"
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Set Environment variables
         run: |-
@@ -37,3 +65,21 @@ jobs:
 
       - name: Publish the docker image
         run: docker push apoorvkumarsharma/docker_v1
+
+      - name: download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition $ECS_TASK --query taskDefinition > task-definition.json
+      - name: fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: apoorvkumarsharma/docker_v1:latest
+      - name: deploy Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
