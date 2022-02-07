@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: ap-south-1
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
 
 jobs:
   build_and_publish:
@@ -28,7 +28,7 @@ jobs:
           echo "ECS_TASK=project-1-task" >> "$GITHUB_ENV"
           echo "CONTAINER_NAME=project-1-deploy" >> "$GITHUB_ENV"
           echo "AWS_KEY=$AWS_ACCESS_KEY_ID" >> "$GITHUB_ENV"
-          echo "AWS_SECRET=$AWS_SECRET_ACCESS_KEY" >> "$GITHUB_ENV"
+          echo "AWS_SECRET=$AWS_ACCESS_KEY" >> "$GITHUB_ENV"
 
       - name: Branch
         run: echo "${{github.ref}}"
